@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.DISCUSS_TOPIC = exports.CATEGORY_TOPIC_LIST = void 0;
-const CATEGORY_TOPIC_LIST = `
+const CATEGORY_TOPIC_LIST: string = `
   query categoryTopicList($categories: [String!]!, $orderBy: TopicSortingOption, $query: String, $tags: [String!], $after: String) {
     categoryTopicList(categories: $categories, orderBy: $orderBy, query: $query, tags: $tags, first: 20, after: $after) {
       edges {
@@ -20,8 +17,8 @@ const CATEGORY_TOPIC_LIST = `
       }
     }
   }`;
-exports.CATEGORY_TOPIC_LIST = CATEGORY_TOPIC_LIST;
-const DISCUSS_TOPIC = `
+
+const DISCUSS_TOPIC: string = `
   query DiscussTopic($topicId: Int!) {
     topic(id: $topicId) {
       id
@@ -68,4 +65,5 @@ const DISCUSS_TOPIC = `
       }
     }
   }`;
-exports.DISCUSS_TOPIC = DISCUSS_TOPIC;
+
+export { CATEGORY_TOPIC_LIST, DISCUSS_TOPIC };
