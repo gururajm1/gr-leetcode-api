@@ -3,8 +3,8 @@ const axios = require("axios");
 const readline = require("readline");
 const QUERY = require("./query");
 
-const LEETCODE_GRAPHQL_URL = process.env.LEETCODE_GRAPHQL_URL || "https://leetcode.com/graphql";
-const CATEGORIES = process.env.CATEGORIES ? process.env.CATEGORIES.split(",") : ["interview-question"];
+const URL = process.env.URL;
+const CATEGORIES = "interview-question";
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -30,7 +30,7 @@ async function fetchAllDiscussions() {
 
   while (hasNextPage) {
     try {
-      const response = await axios.post(LEETCODE_GRAPHQL_URL, {
+      const response = await axios.post(URL, {
         operationName: "categoryTopicList",
         query: QUERY.CATEGORY_TOPIC_LIST,
         variables: {
@@ -79,7 +79,7 @@ async function fetchAllDiscussions() {
 
 async function fetchDiscussionById(topicId) {
   try {
-    const response = await axios.post(LEETCODE_GRAPHQL_URL, {
+    const response = await axios.post(URL, {
       operationName: "DiscussTopic",
       query: QUERY.DISCUSS_TOPIC,
       variables: { topicId },
