@@ -1,15 +1,15 @@
 import puppeteer from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import { RateLimiter } from "limiter";
+import { Browser } from "puppeteer";
 
 puppeteer.use(StealthPlugin());
 
+// Rate limiter to avoid getting blocked
 const limiter = new RateLimiter({ tokensPerInterval: 1, interval: 1000 });
 
 async function fetchCompanyArticles(companyName: string) {
     try {
-        await limiter.removeTokens(1);
-
         const browser = await puppeteer.launch({
             headless: true,
             args: ["--no-sandbox", "--disable-setuid-sandbox"],
@@ -67,21 +67,25 @@ async function fetchCompanyArticles(companyName: string) {
             console.log(`✅ Articles for ${companyName} Fetched`);
             if (articles.articlesData.length > 0) {
                 console.log("Articles from .article_heading and .article_content a:");
-                articles.articlesData.forEach((article, index) => {
-                    console.log(`Article ${index + 1}:`);
+                for (let i = 0; i < articles.articlesData.length; i++) {
+                    const article = articles.articlesData[i];
+                    console.log(`Article ${i + 1}:`);
                     console.log(`Heading: ${article.heading}`);
                     console.log(`Link: ${article.link}`);
-                    console.log("-----------------------------");
-                });
+                    await fetchArticleContent(browser, article.link);
+                    console.log("----------------------------------------------------------------------------------------");
+                }
             }
             if (articles.subheadingArticlesData.length > 0) {
                 console.log("Articles from .article_subheading a:");
-                articles.subheadingArticlesData.forEach((article, index) => {
-                    console.log(`Article ${index + 1}:`);
+                for (let i = 0; i < articles.subheadingArticlesData.length; i++) {
+                    const article = articles.subheadingArticlesData[i];
+                    console.log(`Article ${i + 1}:`);
                     console.log(`Heading: ${article.heading}`);
                     console.log(`Link: ${article.link}`);
-                    console.log("-----------------------------");
-                });
+                    await fetchArticleContent(browser, article.link);
+                    console.log("----------------------------------------------------------------------------------------");
+                }
             }
         } else {
             console.log("No articles found for this company.");
@@ -90,6 +94,40 @@ async function fetchCompanyArticles(companyName: string) {
         await browser.close();
     } catch (error) {
         console.error("❌ Error:", error);
+    }
+}
+
+async function fetchArticleContent(browser: Browser, url: string) {
+    try {
+        await limiter.removeTokens(1); // Apply rate limiting
+
+        const page = await browser.newPage();
+        await page.setUserAgent(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        );
+
+        console.log(`Fetching content from ${url}...`);
+        await page.goto(url, { waitUntil: "networkidle2" });
+
+        const content = await page.evaluate(() => {
+            const textContainer = document.querySelector<HTMLElement>(".text");
+            if (textContainer) {
+                // Extract all text content within the .text class
+                return textContainer.innerText;
+            }
+            return null;
+        });
+
+        if (content) {
+            console.log("Text Content:");
+            console.log(content); // Print the structured text content
+        } else {
+            console.log("No content found in the .text class.");
+        }
+
+        await page.close();
+    } catch (error) {
+        console.error(`❌ Error fetching content from ${url}:`, error);
     }
 }
 
