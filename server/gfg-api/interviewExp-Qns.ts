@@ -48,7 +48,6 @@ async function fetchCompanyArticles(companyName: string) {
                     }
                 }
 
-                // Check for .article_subheading a
                 const subheadingElement = container.querySelector<HTMLAnchorElement>(".article_subheading a");
                 if (subheadingElement) {
                     const subheading = subheadingElement.textContent?.trim();
@@ -99,7 +98,7 @@ async function fetchCompanyArticles(companyName: string) {
 
 async function fetchArticleContent(browser: Browser, url: string) {
     try {
-        await limiter.removeTokens(1); // Apply rate limiting
+        await limiter.removeTokens(1); 
 
         const page = await browser.newPage();
         await page.setUserAgent(
@@ -112,7 +111,6 @@ async function fetchArticleContent(browser: Browser, url: string) {
         const content = await page.evaluate(() => {
             const textContainer = document.querySelector<HTMLElement>(".text");
             if (textContainer) {
-                // Extract all text content within the .text class
                 return textContainer.innerText;
             }
             return null;
